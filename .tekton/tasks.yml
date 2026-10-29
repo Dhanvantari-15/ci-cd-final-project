@@ -1,4 +1,3 @@
-
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
@@ -8,13 +7,18 @@ spec:
     - name: source
   steps:
     - name: cleanup
-      image: python:3.11-slim
+      image: python:3.9-slim
+      env:
+        - name: WORKSPACE_SOURCE_PATH
+          value: $(workspaces.source.path)
       script: |
         #!/bin/sh
         set -eu
-        find "$(workspaces.source.path)" \
-          -type d -name __pycache__ \
-          -prune -exec rm -rf {} +
+        if [ -d "$WORKSPACE_SOURCE_PATH" ]; then
+          find "$WORKSPACE_SOURCE_PATH" \
+            -mindepth 1 -maxdepth 1 \
+            -exec rm -rf {} +
+        fi
         echo "Cleanup completed"
 
 ---
@@ -27,10 +31,10 @@ spec:
     - name: source
   steps:
     - name: run-tests
-      image: python:3.11-slim
+      image: python:3.9-slim
       workingDir: $(workspaces.source.path)
       script: |
         #!/bin/sh
         set -eu
-        python -m pip install Flask requests
-        python -m unittest -v test_emotion_detection.py
+        python -m pip install Flask requests nose
+        nosetests -v test_emotion_detection.py
