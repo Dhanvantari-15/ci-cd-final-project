@@ -1,6 +1,6 @@
 # ci-cd-final-project
 
-## Emotion Detection Web Application
+
 
 This project analyzes text and identifies five emotions using the IBM Watson NLP Emotion Prediction service.
 
